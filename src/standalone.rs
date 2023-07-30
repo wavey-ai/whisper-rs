@@ -2,6 +2,7 @@
 
 use crate::WhisperToken;
 use std::ffi::{c_int, CStr, CString};
+use whisper_rs_sys::whisper_context;
 
 /// Return the id of the specified language, returns -1 if not found
 ///
@@ -59,16 +60,16 @@ pub fn get_lang_str(id: i32) -> Option<&'static str> {
 ///
 /// # C++ equivalent
 /// `whisper_token whisper_token_translate ()`
-pub fn token_translate() -> WhisperToken {
-    unsafe { whisper_rs_sys::whisper_token_translate() }
+pub fn token_translate(ctx: *mut whisper_context) -> WhisperToken {
+    unsafe { whisper_rs_sys::whisper_token_translate(ctx) }
 }
 
 /// Get the ID of the transcribe task token.
 ///
 /// # C++ equivalent
 /// `whisper_token whisper_token_transcribe()`
-pub fn token_transcribe() -> WhisperToken {
-    unsafe { whisper_rs_sys::whisper_token_transcribe() }
+pub fn token_transcribe(ctx: *mut whisper_context) -> WhisperToken {
+    unsafe { whisper_rs_sys::whisper_token_transcribe(ctx) }
 }
 
 /// Print system information.
