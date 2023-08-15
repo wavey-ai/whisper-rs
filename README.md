@@ -1,3 +1,10 @@
+# fork of whisper-rs
+
+This fork adds whisper.cpp as a subtree rather than a submodule, and includes
+the fork of whisper.cpp here:
+
+https://github.com/wavey-ai/whisper.cpp
+
 # whisper-rs
 
 Rust bindings to [whisper.cpp](https://github.com/ggerganov/whisper.cpp/)
