@@ -269,6 +269,8 @@ impl WhisperState {
     /// * params: [crate::FullParams] struct.
     /// * pcm: raw PCM audio data, 32 bit floating point at a sample rate of 16 kHz, 1 channel.
     ///   See utilities in the root of this crate for functions to convert audio to this format.
+    ///   Can be empty if you have already called [WhisperState::set_mel] to provide a pre-computed
+    ///   mel spectrogram (supported since whisper.cpp PR #1214).
     ///
     /// # Returns
     /// Ok(c_int) on success, Err(WhisperError) on failure.
@@ -276,18 +278,21 @@ impl WhisperState {
     /// # C++ equivalent
     /// `int whisper_full(struct whisper_context * ctx, struct whisper_full_params params, const float * samples, int n_samples)`
     pub fn full(&mut self, params: FullParams, data: &[f32]) -> Result<c_int, WhisperError> {
-        if data.is_empty() {
-            // can randomly trigger segmentation faults if we don't check this
-            return Err(WhisperError::NoSamples);
-        }
+        // Empty data is valid when set_mel() has been called first.
+        // whisper.cpp PR #1214 added support for this: "don't overwrite mel.data if samples == 0"
+        let (ptr, len) = if data.is_empty() {
+            (std::ptr::null(), 0)
+        } else {
+            (data.as_ptr(), data.len() as c_int)
+        };
 
         let ret = unsafe {
             whisper_rs_sys::whisper_full_with_state(
                 self.ctx.ctx,
                 self.ptr,
                 params.fp,
-                data.as_ptr(),
-                data.len() as c_int,
+                ptr,
+                len,
             )
         };
         if ret == -1 {
